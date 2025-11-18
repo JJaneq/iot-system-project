@@ -86,5 +86,9 @@ services:
     depends_on:
       - mqtt_broker
       - db
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
 volumes:
   db_data:

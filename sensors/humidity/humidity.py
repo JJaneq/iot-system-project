@@ -3,6 +3,8 @@ import random
 import time
 import json
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.connect("mqtt_broker", 1883, 60)
