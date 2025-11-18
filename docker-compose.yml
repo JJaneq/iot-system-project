@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  mqtt_broker:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./manager/mqtt-config.conf:/mosquitto/config/mosquitto.conf
+  temperature_room_1:
+    build: 
+      context: .
+      dockerfile: ./sensors/temperature/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_TEMPERATURE_1}
+    depends_on:
+      - mqtt_broker
+  humidity_room_1:
+    build: 
+      context: .
+      dockerfile: ./sensors/humidity/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_HUMIDITY_1}
+    depends_on:
+      - mqtt_broker
+  light_level_room_1:
+    build: 
+      context: .
+      dockerfile: ./sensors/light_level/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_LIGHT_LEVEL_1}
+    depends_on:
+      - mqtt_broker
+  movement_room_1:
+    build: 
+      context: .
+      dockerfile: ./sensors/movement/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_MOVEMENT_1}
+    depends_on:
+      - mqtt_broker
+  temperature_room_2:
+    build: 
+      context: .
+      dockerfile: ./sensors/temperature/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_TEMPERATURE_2}
+    depends_on:
+      - mqtt_broker
+  humidity_room_2:
+    build: 
+      context: .
+      dockerfile: ./sensors/humidity/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_HUMIDITY_2}
+    depends_on:
+      - mqtt_broker
+  light_level_room_2:
+    build: 
+      context: .
+      dockerfile: ./sensors/light_level/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_LIGHT_LEVEL_2}
+    depends_on:
+      - mqtt_broker
+  movement_room_2:
+    build:
+      context: .
+      dockerfile: ./sensors/movement/Dockerfile
+    environment:
+      - UUID=${SENSOR_UUID_MOVEMENT_2}
+    depends_on:
+      - mqtt_broker
+  manager:
+    build:
+      context: .
+      dockerfile: manager/Dockerfile
+    depends_on:
+      - mqtt_broker
+      - db
+volumes:
+  db_data:

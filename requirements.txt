@@ -1,0 +1,4 @@
+paho-mqtt==2.1.0
+psycopg==3.2.12
+psycopg-binary==3.2.12
+typing-extensions==4.15.0
