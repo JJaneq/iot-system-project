@@ -83,6 +83,8 @@ services:
     build:
       context: .
       dockerfile: manager/Dockerfile
+    ports:
+    - "3000:3000"
     depends_on:
       - mqtt_broker
       - db
@@ -90,5 +92,17 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+
+  frontend:
+    build:
+      context: ./smartHome_app
+    container_name: smarthome_frontend
+    depends_on:
+      - manager
+    ports:
+      - "8080:80"
+    volumes:
+      - ./smartHome_app:/usr/share/nginx/html
+    restart: always
 volumes:
   db_data:

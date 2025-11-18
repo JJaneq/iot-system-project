@@ -29,7 +29,7 @@ class DBManager:
             );
         """)
         self.connection.commit()
-        # rozwiązanie potężnie leniwe - wiem
+        # rozwiązanie potężnie leniwe - wiem xd
         self._insert_sensor('82f5e80c-822e-4e93-a6c7-ee1a6b7d22b2', 'temperature', 1)
         self._insert_sensor('c942b154-1afc-4d17-af3a-1bc6c8e345c9', 'light_level', 1)
         self._insert_sensor('fa7c3cc2-3055-41e6-9781-69e1caf98c1d', 'humidity', 1)

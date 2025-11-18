@@ -1,0 +1,187 @@
+/* Bazowe style i czcionki */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #4338ca;
+    text-align: center;
+}
+
+/* Układ responsywny (Grid/Flex) */
+.layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) { /* lg: breakpoint */
+    .layout-grid {
+        flex-direction: row;
+    }
+    .visualization-panel, .control-panel {
+        flex: 1; /* Równa szerokość 50% */
+    }
+}
+
+/* Panel Wizualizacji SVG */
+.visualization-panel {
+    padding: 1rem;
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb; /* border-gray-200 */
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+}
+
+.svg-map {
+    width: 100%;
+    height: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+}
+
+.room-area {
+    transition: fill 0.3s, opacity 0.3s, stroke 0.3s;
+    cursor: pointer;
+}
+.light-on {
+    fill: #fff3c4;
+    stroke: #fbbf24;
+}
+.light-off {
+    fill: #e5e7eb;
+    stroke: #9ca3af;
+}
+
+.motion-indicator {
+    transition: opacity 0.3s;
+}
+.motion-indicator.motion-detected {
+    animation: pulse-red 1s infinite alternate;
+}
+@keyframes pulse-red {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 0.2;
+    }
+}
+
+/* Panel Kontroli */
+.room-section {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.primary-room {
+    border: 1px solid #a5b4fc;
+    background-color: #eef2ff;
+}
+.primary-room h3 {
+    color: #4f46e5;
+}
+
+.secondary-room {
+    border: 1px solid #d8b4fe;
+    background-color: #faf5ff;
+}
+.secondary-room h3 {
+    color: #9333ea;
+}
+
+/* Grupy Kontrolne (przyciski/suwaki) */
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.control-group-slider {
+    margin-bottom: 0.75rem;
+}
+
+.status-text {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Przyciski */
+.button {
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.15s ease-in-out;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.button-toggle {
+    background-color: #9ca3af;
+}
+.button-toggle:hover {
+    background-color: #6b7280;
+}
+
+.button-success {
+    background-color: #10b981;
+}
+.button-success:hover {
+    background-color: #059669;
+}
+
+/* Suwaki */
+.slider {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.mode-toggle-temp, .mode-toggle-humidity {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.mode-btn-1T, .mode-btn-1H, .mode-btn-2T, .mode-btn-2H {
+    background-color: #9ca3af;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.15s ease-in-out;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.mode-btn-1T.active, .mode-btn-1H.active, .mode-btn-2T.active, .mode-btn-2H.active{
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}

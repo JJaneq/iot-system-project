@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHome IoT Dashboard (PoC)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="container">
+        <h1 class="text-4xl font-bold mb-8 text-indigo-700 text-center">Panel Sterowania SmartHome IoT</h1>
+        
+        <div class="layout-grid">
+            
+            <!-- Lewa Strona: Wizualizacja SVG Domu -->
+            <div class="visualization-panel">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Wizualizacja Domu</h2>
+                <svg id="smarthome-svg" viewBox="0 0 400 300" class="svg-map">
+                    <!-- Tło domu -->
+                    <rect x="50" y="50" width="300" height="200" fill="#f3f4f6" stroke="#4b5563" stroke-width="3"/>
+                    
+                    <!-- Pokój 1 (Lewy) -->
+                    <rect id="room1-light" class="room-area light-off" x="50" y="50" width="150" height="200" stroke-width="2" data-room="room1"/>
+                    <text x="125" y="150" font-size="16" fill="#4b5563" text-anchor="middle" font-weight="bold">Pokój 1</text>
+                    
+                    <!-- Pokój 2 (Prawy) -->
+                    <rect id="room2-light" class="room-area light-off" x="200" y="50" width="150" height="200" stroke-width="2" data-room="room2"/>
+                    <text x="275" y="150" font-size="16" fill="#4b5563" text-anchor="middle" font-weight="bold">Pokój 2</text>
+
+                    <!-- Wskaźniki Temperatury/Wilgotności/etc. -->
+                    <text id="room1-temp-display" x="125" y="200" font-size="14" fill="#1f2937" text-anchor="middle">T: 22°C</text>
+                    <text id="room2-temp-display" x="275" y="200" font-size="14" fill="#1f2937" text-anchor="middle">T: 24°C</text>
+
+                    <text id="room1-humidity-display" x="125" y="218" font-size="14" fill="#1f2937" text-anchor="middle">H: 58%</text>
+                    <text id="room2-humidity-display" x="275" y="218" font-size="14" fill="#1f2937" text-anchor="middle">H: 56%</text>
+                </svg>
+            </div>
+
+            <!-- Prawa Strona: Panel Sterowania -->
+            <div class="control-panel">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Kontrola Urządzeń</h2>
+
+                <!-- Sekcja Pokój 1 -->
+                <div class="room-section primary-room">
+                    <h3 class="text-xl font-bold mb-4">Pokój 1</h3>
+                    
+                    <!-- Przycisk Światła -->
+                    <div class="control-group">
+                        <span class="font-medium text-gray-700">Oświetlenie: </span>
+                        <button id="light1-btn" class="button button-toggle">Włącz/Wyłącz</button>
+                    </div>
+
+                    <!-- Suwak Temperatury -->
+                    <div class="control-group-slider">
+                        <label for="temp1-slider">Temperatura (<span id="temp1-value">22</span>°C):</label>
+                        <input type="range" id="temp1-slider" min="15" max="30" value="22" class="slider">
+                    </div>
+                    
+
+                    <label>Wybierz akcję temperatury</label>
+                    <div class="mode-toggle-temp">
+                        <button id="mode-heat" class="mode-btn-1T">Grzanie</button>
+                        <button id="mode-normal" class="mode-btn-1T active">Standard</button>
+                        <button id="mode-cool" class="mode-btn-1T">Chłodzenie</button>
+                    </div>
+
+                    <!-- Suwak Wilgotności -->
+                    <div class="control-group-slider">
+                        <label for="humidity1-slider">Wilgotność (<span id="humidity1-value">50</span>%):</label>
+                        <input type="range" id="humidity1-slider" min="30" max="70" value="50" class="slider accent-blue">
+                    </div>
+
+                    <label>Wybierz akcję wilgotności</label>
+                    <div class="mode-toggle-humidity">
+                        <button id="mode-wet" class="mode-btn-1H">Nawilżanie</button>
+                        <button id="mode-normal" class="mode-btn-1H active">Standard</button>
+                        <button id="mode-dry" class="mode-btn-1H">Suszenie</button>
+                    </div>
+
+                    <div id="room1-status" class="status-text">Status: Światło Wyłączone.</div>
+                </div>
+
+                <!-- Sekcja Pokój 2 -->
+                <div class="room-section secondary-room">
+                    <h3 class="text-xl font-bold mb-4">Pokój 2</h3>
+
+                    <!-- Przycisk Światła -->
+                    <div class="control-group">
+                        <span class="font-medium text-gray-700">Oświetlenie: </span>
+                        <button id="light2-btn" class="button button-toggle">Włącz/Wyłącz</button>
+                    </div>
+
+                    <!-- Suwak Temperatury -->
+                    <div class="control-group-slider">
+                        <label for="temp2-slider">Temperatura (<span id="temp2-value">24</span>°C):</label>
+                        <input type="range" id="temp2-slider" min="15" max="30" value="24" class="slider">
+                    </div>
+
+                    <label>Wybierz akcję temperatury</label>
+                    <div class="mode-toggle-temp">
+                        <button id="mode-heat" class="mode-btn-2T">Grzanie</button>
+                        <button id="mode-normal" class="mode-btn-2T active">Standard</button>
+                        <button id="mode-cool" class="mode-btn-2T">Chłodzenie</button>
+                    </div>
+
+                    <!-- Suwak Wilgotności -->
+                    <div class="control-group-slider">
+                        <label for="humidity2-slider">Wilgotność (<span id="humidity2-value">45</span>%):</label>
+                        <input type="range" id="humidity2-slider" min="30" max="70" value="45" class="slider accent-blue">
+                    </div>
+
+                    <label>Wybierz akcję wilgotności</label>
+                    <div class="mode-toggle-humidity">
+                        <button id="mode-wet" class="mode-btn-2H">Nawilżanie</button>
+                        <button id="mode-normal" class="mode-btn-2H active">Standard</button>
+                        <button id="mode-dry" class="mode-btn-2H">Suszenie</button>
+                    </div>
+
+                    <div id="room2-status" class="status-text">Status: Światło Wyłączone.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>
