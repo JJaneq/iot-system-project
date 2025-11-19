@@ -1,6 +1,6 @@
 export async function getLastRoomData() {
     try {
-        // const response = await fetch('http://manager:3000/api/lastdata')
+        const response = await fetch('http://localhost:3000/api/lastdata')
         // TESTOWO BO SIEC DOCKERA NIE DZIALA
         // const response = await fetch('http://localhost:3000/api/lastdata')
         console.log(response)

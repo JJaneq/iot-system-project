@@ -1,4 +1,21 @@
 import { getLastRoomData } from "./api_client.js";
+import { createWebSocket } from './ws_client.js';
+
+const sensorsStore = new Map();
+// Funkcja do aktualizacji UI
+function updateUISocket(data) {
+    console.log(data)
+    const sensor = sensorsStore.get(data.uuid);
+
+    if (!sensor) {
+        console.warn("Sensor ID not found in store", data.sensor_id);
+        return;
+    }
+    updateUI(sensor.room, sensor.type, data.value);
+}
+
+const ws = createWebSocket(updateUISocket);
+
 /**
  * Przełącza stan wizualny światła (ON/OFF) i aktualizuje status tekstowy.
  * @param {string} room - Nazwa pokoju ('room1' lub 'room2').
@@ -53,6 +70,33 @@ function updateValue(sliderId, valueDisplayId, svgDisplayId) {
     }
 }
 
+function updateUIFromSensors(data) {
+    data.forEach(item => {
+
+        sensorsStore.set(item.sensor_id, {
+            room: item.room_number,
+            type: item.sensor_type
+        });
+        console.log(sensorsStore)
+
+        updateUI(item.room_number, item.sensor_type, item.value);
+    });
+}
+
+function updateUI(room, type, value) {
+    if (type === "temperature") {
+        document.getElementById(`temp${room}-slider`).value = value;
+        document.getElementById(`temp${room}-value`).textContent = value.toFixed(1);
+        document.getElementById(`room${room}-temp-display`).textContent = `T: ${value.toFixed(1)}°C`;
+    }
+
+    if (type === "humidity") {
+        document.getElementById(`humidity${room}-slider`).value = value;
+        document.getElementById(`humidity${room}-value`).textContent = value.toFixed(1);
+        document.getElementById(`room${room}-humidity-display`).textContent = `W: ${value.toFixed(1)}%`;
+    }
+}
+
 
 // --- INICJALIZACJA I PODPIĘCIE ZDARZEŃ ---
 
@@ -60,7 +104,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- POBRANIE DANYCH Z BACKENDU NA START ---
     const lastData = await getLastRoomData();
     console.log("Dane z backendu na starcie:", lastData);
-
+    updateUIFromSensors(lastData);
+    
     // --- POKÓJ 1 ---
     
     // Oświetlenie

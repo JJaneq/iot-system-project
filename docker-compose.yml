@@ -165,6 +165,7 @@ services:
       dockerfile: manager/Dockerfile
     ports:
     - "3000:3000"
+    - "8765:8765"
     depends_on:
       - mqtt_broker
       - db

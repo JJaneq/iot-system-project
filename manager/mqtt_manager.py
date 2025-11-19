@@ -3,6 +3,9 @@ import paho.mqtt.client as mqtt
 import db_manager
 import os
 import json
+from ws_server import connections
+import asyncio
+from ws_server import queue
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -76,6 +79,10 @@ def on_message(client, userdata, msg):
         sensor_id = data.get("uuid")
         db.insert_sensor_data(sensor_id)
         movement_check(client, data.get("room_id"))
+    
+    # push do WebSocket
+    payload = msg.payload.decode()
+    queue.put_nowait(payload)
 
 def temperature_analysis(client, value: float, room_id: int, activator):
     room_thresholds = read_room_thresholds(room_id)

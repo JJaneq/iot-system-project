@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import db_manager
 import os
 import json
@@ -10,13 +11,8 @@ db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 db = db_manager.DBManager(db_name, db_user, db_password)
 
-last_values = {
-    "light": 50,
-    "temperature": 23,
-    "humidity": 54,
-}
-
 app = Flask(__name__)
+CORS(app)
 
 @app.get("/api/lastdata")
 def get_last():
