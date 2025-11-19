@@ -10,6 +10,7 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.connect("mqtt_broker", 1883, 60)
 client.loop_start()
 uuid_str = os.getenv("UUID")
+room_id = os.getenv("ROOM_ID")
 
 if not uuid_str:
     print("UUID environment variable not set. Exiting.")
@@ -21,6 +22,7 @@ def read_humidity():
 while True:
     message = {
         "uuid": uuid_str,
+        "room_id": room_id,
         "value": read_humidity()
     }
     message = json.dumps(message)

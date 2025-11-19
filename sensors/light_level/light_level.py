@@ -11,6 +11,7 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.connect("mqtt_broker", 1883, 60)
 client.loop_start()
 uuid_str = str(os.getenv("UUID"))
+room_id = os.getenv("ROOM_ID")
 
 def read_light_level():
     return round(random.uniform(0.0, 100.0), 2)
@@ -18,6 +19,7 @@ def read_light_level():
 while True:
     message = {
         "uuid": uuid_str,
+        "room_id": room_id,
         "value": read_light_level()
     }
     message = json.dumps(message)

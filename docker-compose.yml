@@ -21,6 +21,7 @@ services:
       dockerfile: ./sensors/temperature/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_TEMPERATURE_1}
+      - ROOM_ID=1
     depends_on:
       - mqtt_broker
   humidity_room_1:
@@ -29,6 +30,7 @@ services:
       dockerfile: ./sensors/humidity/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_HUMIDITY_1}
+      - ROOM_ID=1
     depends_on:
       - mqtt_broker
   light_level_room_1:
@@ -37,6 +39,7 @@ services:
       dockerfile: ./sensors/light_level/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_LIGHT_LEVEL_1}
+      - ROOM_ID=1
     depends_on:
       - mqtt_broker
   movement_room_1:
@@ -45,6 +48,7 @@ services:
       dockerfile: ./sensors/movement/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_MOVEMENT_1}
+      - ROOM_ID=1
     depends_on:
       - mqtt_broker
   temperature_room_2:
@@ -53,6 +57,7 @@ services:
       dockerfile: ./sensors/temperature/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_TEMPERATURE_2}
+      - ROOM_ID=2
     depends_on:
       - mqtt_broker
   humidity_room_2:
@@ -61,6 +66,7 @@ services:
       dockerfile: ./sensors/humidity/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_HUMIDITY_2}
+      - ROOM_ID=2
     depends_on:
       - mqtt_broker
   light_level_room_2:
@@ -69,6 +75,7 @@ services:
       dockerfile: ./sensors/light_level/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_LIGHT_LEVEL_2}
+      - ROOM_ID=2
     depends_on:
       - mqtt_broker
   movement_room_2:
@@ -77,6 +84,79 @@ services:
       dockerfile: ./sensors/movement/Dockerfile
     environment:
       - UUID=${SENSOR_UUID_MOVEMENT_2}
+      - ROOM_ID=2
+    depends_on:
+      - mqtt_broker
+  vent_room_1:
+    build:
+      context: .
+      dockerfile: ./activators/vent/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_VENT_1}
+      - ROOM_ID=1
+    depends_on:
+      - mqtt_broker
+  vent_room_2:
+    build:
+      context: .
+      dockerfile: ./activators/vent/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_VENT_2}
+      - ROOM_ID=2
+    depends_on:
+      - mqtt_broker
+  heater_room_1:
+    build:
+      context: .
+      dockerfile: ./activators/heater-air-con/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_HEATER_1}
+      - ROOM_ID=1
+    depends_on:
+      - mqtt_broker
+  heater_room_2:
+    build:
+      context: .
+      dockerfile: ./activators/heater-air-con/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_HEATER_2}
+      - ROOM_ID=2
+    depends_on:
+      - mqtt_broker
+  alarm_room_1:
+    build:
+      context: .
+      dockerfile: ./activators/alarm/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_ALARM_1}
+      - ROOM_ID=1
+    depends_on:
+      - mqtt_broker
+  alarm_room_2:
+    build:
+      context: .
+      dockerfile: ./activators/alarm/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_ALARM_2}
+      - ROOM_ID=2
+    depends_on:
+      - mqtt_broker
+  light_room_1:
+    build:
+      context: .
+      dockerfile: ./activators/light/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_LIGHT_1}
+      - ROOM_ID=1
+    depends_on:
+      - mqtt_broker
+  light_room_2:
+    build:
+      context: .
+      dockerfile: ./activators/light/Dockerfile
+    environment:
+      - UUID=${ACTIVATOR_UUID_LIGHT_2}
+      - ROOM_ID=2
     depends_on:
       - mqtt_broker
   manager:
