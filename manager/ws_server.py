@@ -16,7 +16,6 @@ async def ws_handler(ws):
         async for msg in ws:
             try:
                 mqtt_client.publish("activators/update", msg, qos=1)
-                print("WebSocket → MQTT:", msg)
             except Exception as e:
                 print("Błąd MQTT:", e)
     finally:

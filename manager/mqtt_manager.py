@@ -20,6 +20,7 @@ sensors = db.get_all_sensors()
 activators = db.get_all_activators()
 for activator in activators:
     activator['status'] = "OFF"
+    activator['auto'] = True
 # i tak tego nie rozszerzamy
 room_lights = {
     '1': 'HIGH',
@@ -64,7 +65,7 @@ def on_message(client, userdata, msg):
         db.insert_sensor_data(sensor_id, value)
         activator = None
         for act in activators:
-            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['heater']:
+            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['heater'] and act['auto']:
                 activator = act
                 break
         if activator is None:
@@ -80,7 +81,7 @@ def on_message(client, userdata, msg):
         # mocno nieoptymalne ale chcę od tego odejść zostawiając coś co działa
         activator = None
         for act in activators:
-            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['vent']:
+            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['vent'] and act['auto']:
                 activator = act
                 break
         if activator is None:
@@ -92,6 +93,19 @@ def on_message(client, userdata, msg):
         sensor_id = data.get("uuid")
         db.insert_sensor_data(sensor_id)
         movement_check(client, data.get("room_id"))
+    elif msg.topic == "activators/update":
+        activator_update = json.loads(msg.payload.decode())
+        logger.info(f"Activator update received: {activator_update}")
+        # for act in activators:
+        #     if str(act['id']) == str(activator_update.get("id")):
+        #         act['status'] = activator_update.get("status")
+        #         act['auto'] = activator_update.get("auto")
+                
+        #         if act['auto'] == False:
+        #             logger.info(f"Deactivating automatic control for activator {act['id']}")
+        #         if act['type'] == 
+                
+        #         break
 
     logger.info("Putting message to WebSocket queue")
     
@@ -145,6 +159,14 @@ def light_level_analysis(client, value: float, room_id: int):
         room_lights[room_id] = 'HIGH'
 
 def movement_check(client, room_id: int):
+    room_light_activator = None
+    for act in activators:
+        if str(act['room_number']) == str(room_id) and act['type'] in ['light'] and act['auto']:
+            room_light_activator = act
+            break
+    if room_light_activator is None:
+        logger.info("No active activator found for movement check")
+        return
     if alarm_status[room_id] == 'ON':
         logger.info("Sending ALARM/ON command")
         client.publish(f'alarm/control-{room_id}', 'ON')

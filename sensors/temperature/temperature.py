@@ -13,8 +13,8 @@ uuid_str = str(os.getenv("UUID"))
 room_id = os.getenv("ROOM_ID")
 
 def read_temperature():
-    # return round(random.uniform(20.0, 30.0), 2)
-    return random.choice([-100, 100])
+    return round(random.uniform(20.0, 30.0), 2)
+    # return random.choice([-100, 100])
 
 while True:
     message = {
