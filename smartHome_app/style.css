@@ -70,21 +70,10 @@ h1 {
     fill: #e5e7eb;
     stroke: #9ca3af;
 }
+.alarm-on {
+    stroke: red;
+}
 
-.motion-indicator {
-    transition: opacity 0.3s;
-}
-.motion-indicator.motion-detected {
-    animation: pulse-red 1s infinite alternate;
-}
-@keyframes pulse-red {
-    from {
-        opacity: 0.8;
-    }
-    to {
-        opacity: 0.2;
-    }
-}
 
 /* Panel Kontroli */
 .room-section {
@@ -163,7 +152,7 @@ h1 {
     appearance: none;
 }
 
-.mode-toggle-temp, .mode-toggle-humidity {
+.mode-toggle-temp1, .mode-toggle-humidity1 , .mode-toggle-temp2, .mode-toggle-humidity2 {
     display: flex;
     gap: 8px;
     margin: 10px 0;

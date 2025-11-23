@@ -4,7 +4,7 @@ import { createWebSocket } from './ws_client.js';
 const sensorsStore = new Map();
 // Funkcja do aktualizacji UI
 function updateUISocket(data) {
-    console.log(data)
+    console.log("OTRZYMAŁEM Z SOCKETA", data)
     const sensor = sensorsStore.get(data.uuid);
 
     if (!sensor) {
@@ -36,7 +36,7 @@ function toggleLight(room) {
         lightElement.classList.remove('light-off');
         lightElement.classList.add('light-on');
         statusElement.textContent = 'Status: Światło WŁĄCZONE.';
-        button.style.backgroundColor = '#f59e0b'; // Złoty kolor po włączeniu
+        button.style.backgroundColor = '#f59e0b';
 
         ws.send(JSON.stringify({
             type: "light",
@@ -58,27 +58,28 @@ function toggleLight(room) {
     }
 }
 
-/**
- * Aktualizuje wartość suwaka w panelu i w wizualizacji SVG (tylko temperatura).
- * @param {string} sliderId - ID suwaka ('temp1-slider', 'humidity2-slider', etc.).
- * @param {string} valueDisplayId - ID elementu <span> z wartością numeryczną.
- * @param {string | null} svgDisplayId - ID elementu <text> w SVG (lub null, jeśli nie dotyczy).
- */
-function updateValue(sliderId, valueDisplayId, svgDisplayId) {
-    const slider = document.getElementById(sliderId);
-    const valueDisplay = document.getElementById(valueDisplayId);
-    
-    const value = slider.value;
-    valueDisplay.textContent = value;
 
-    // Aktualizuj wartość w SVG (jeśli dotyczy, np. dla temperatury)
-    if (svgDisplayId) {
-        const svgDisplay = document.getElementById(svgDisplayId);
-        if (svgDisplay) {
-            const unit = (sliderId.includes('temp')) ? '°C' : '%';
-            const label = (sliderId.includes('temp')) ? 'T' : 'W';
-            svgDisplay.textContent = `${label}: ${value}${unit}`;
-        }
+function toggleAlarm(room) {
+    const alarmElementId = `${room}-light`;
+    const alarmElement = document.getElementById(alarmElementId);
+    const button = document.getElementById(`alarm${room.slice(-1)}-btn`);
+    const isAlarmOn = alarmElement.classList.contains('alarm-on');
+    if (!isAlarmOn) {
+        button.style.backgroundColor = '#e54712ff';
+        alarmElement.classList.add('alarm-on');
+        ws.send(JSON.stringify({
+            type: "alarm",
+            room,
+            state: "on"
+        }));
+    } else {
+        button.style.backgroundColor = '#9ca3af';
+        alarmElement.classList.remove('alarm-on');
+        ws.send(JSON.stringify({
+            type: "alarm",
+            room,
+            state: "off"
+        }));
     }
 }
 
@@ -97,20 +98,15 @@ function updateUIFromSensors(data) {
 
 function updateUI(room, type, value) {
     if (type === "temperature") {
-        document.getElementById(`temp${room}-slider`).value = value;
         document.getElementById(`temp${room}-value`).textContent = value.toFixed(1);
         document.getElementById(`room${room}-temp-display`).textContent = `T: ${value.toFixed(1)}°C`;
     }
 
     if (type === "humidity") {
-        document.getElementById(`humidity${room}-slider`).value = value;
         document.getElementById(`humidity${room}-value`).textContent = value.toFixed(1);
         document.getElementById(`room${room}-humidity-display`).textContent = `W: ${value.toFixed(1)}%`;
     }
 }
-
-
-// --- INICJALIZACJA I PODPIĘCIE ZDARZEŃ ---
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- POBRANIE DANYCH Z BACKENDU NA START ---
@@ -126,26 +122,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         toggleLight('room1');
         
     });
-
-    // Temperatura
-    const temp1Slider = document.getElementById('temp1-slider');
-    temp1Slider.addEventListener('input', () => {
-        updateValue('temp1-slider', 'temp1-value', 'room1-temp-display');
-    });
-    // Wymuszenie aktualizacji przy starcie
-    temp1Slider.dispatchEvent(new Event('input')); 
-
-    // Wilgotność
-    document.getElementById('humidity1-slider').addEventListener('input', () => {
-        updateValue('humidity1-slider', 'humidity1-value','room1-humidity-display');
+       
+    // Alarm
+    document.getElementById('alarm1-btn').addEventListener('click', () => {
+        console.log("Włączam alarm 1")
+        toggleAlarm('room1');
+        
     });
 
-    // Ruch
-    // document.getElementById('motion1-btn').addEventListener('click', () => {
-    //     simulateMotion('room1');
-    // });
-
-    // --- POKÓJ 2 ---
+    // Alarm2
+    document.getElementById('alarm2-btn').addEventListener('click', () => {
+        console.log("Włączam alarm 2")
+        toggleAlarm('room2');
+        
+    });
     
     // Oświetlenie
     document.getElementById('light2-btn').addEventListener('click', () => {
@@ -153,25 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         toggleLight('room2');
     });
 
-    // Temperatura
-    const temp2Slider = document.getElementById('temp2-slider');
-    temp2Slider.addEventListener('input', () => {
-        updateValue('temp2-slider', 'temp2-value', 'room2-temp-display');
-    });
-    // Wymuszenie aktualizacji przy starcie
-    temp2Slider.dispatchEvent(new Event('input'));
-    
-    // Wilgotność
-    document.getElementById('humidity2-slider').addEventListener('input', () => {
-        updateValue('humidity2-slider', 'humidity2-value', 'room2-humidity-display');
-    });
-    
-    // Ruch
-    // document.getElementById('motion1-btn').addEventListener('click', () => {
-    //     simulateMotion('room1');
-    // });
 
-    // Opcjonalnie: kliknięcie na SVG włącza/wyłącza światło w danym pokoju
     document.querySelectorAll('.room-area').forEach(room => {
         room.addEventListener('click', (e) => {
             const roomName = e.target.dataset.room;
@@ -220,6 +192,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log("Wybrany tryb:", mode);
         });
     });
-
      
 });
