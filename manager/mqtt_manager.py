@@ -44,9 +44,13 @@ def on_connect(client, userdata, flags, rc, properties):
     client.subscribe("sensors/temperature", qos=1)
     client.subscribe("sensors/humidity", qos=1)
     client.subscribe("sensors/movement", qos=1)
+    client.subscribe("activators/update", qos=1)
 
 def on_message(client, userdata, msg):
     logger.info(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
+    if msg.topic == 'activators/update':
+        print(msg.payload.decode())
+        return
     if msg.topic == "sensors/light_level":
         data = json.loads(msg.payload.decode())
         sensor_id = data.get("uuid")
