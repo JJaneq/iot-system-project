@@ -20,6 +20,7 @@ sensors = db.get_all_sensors()
 activators = db.get_all_activators()
 for activator in activators:
     activator['status'] = "OFF"
+    activator['auto'] = True
 # i tak tego nie rozszerzamy
 room_lights = {
     '1': 'HIGH',
@@ -48,9 +49,6 @@ def on_connect(client, userdata, flags, rc, properties):
 
 def on_message(client, userdata, msg):
     logger.info(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
-    if msg.topic == 'activators/update':
-        print(msg.payload.decode())
-        return
     if msg.topic == "sensors/light_level":
         data = json.loads(msg.payload.decode())
         sensor_id = data.get("uuid")
@@ -64,7 +62,7 @@ def on_message(client, userdata, msg):
         db.insert_sensor_data(sensor_id, value)
         activator = None
         for act in activators:
-            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['heater']:
+            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['heater'] and act['auto']:
                 activator = act
                 break
         if activator is None:
@@ -80,7 +78,7 @@ def on_message(client, userdata, msg):
         # mocno nieoptymalne ale chcę od tego odejść zostawiając coś co działa
         activator = None
         for act in activators:
-            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['vent']:
+            if str(act['room_number']) == str(data.get("room_id")) and act['type'] in ['vent'] and act['auto']:
                 activator = act
                 break
         if activator is None:
@@ -92,12 +90,48 @@ def on_message(client, userdata, msg):
         sensor_id = data.get("uuid")
         db.insert_sensor_data(sensor_id)
         movement_check(client, data.get("room_id"))
+    elif msg.topic == "activators/update":
+        activator_update = json.loads(msg.payload.decode())
+        logger.info(f"Activator update received: {activator_update}")
+        for act in activators:
+            if str(act['id']) == str(activator_update.get("id")):
+                if activator_update.get("auto") == True:
+                    break
+                act['status'] = activator_update.get("status").upper()
+                act['auto'] = activator_update.get("auto")
+                
+                logger.info(f"Manual mode activator control. Sending command to activator {act['id']}")
+                if act['type'] == 'heater':
+                    if act['status'] == 'ON':
+                        client.publish(f'hac/control-{act["room_number"]}', 'HEATER/ON')
+                    else:
+                        client.publish(f'hac/control-{act["room_number"]}', 'HEATER/OFF')
+                elif act['type'] == 'vent':
+                    if act['status'] == 'ON':
+                        client.publish(f'vent/control-{act["room_number"]}', 'OPEN')
+                    else:
+                        client.publish(f'vent/control-{act["room_number"]}', 'CLOSE')
+                elif act['type'] == 'light':
+                    if act['status'] == 'ON':
+                        client.publish(f'light/control-{act["room_number"]}', 'ON')
+                    else:
+                        client.publish(f'light/control-{act["room_number"]}', 'OFF')
+                elif act['type'] == 'alarm':
+                    if act['status'] == 'ON':
+                        alarm_status[act['room_number']] = 'ON'
+                        client.publish(f'alarm/control-{act["room_number"]}', 'ON')
+                    else:
+                        alarm_status[act['room_number']] = 'OFF'
+                        client.publish(f'alarm/control-{act["room_number"]}', 'OFF')
+                break
 
-    logger.info("Putting message to WebSocket queue")
+    # logger.info("Putting message to WebSocket queue")
     
     # push do WebSocket
-    payload = msg.payload.decode()
+    payload = json.loads(msg.payload.decode())
+    payload["device_type"] = "activator" if msg.topic == "activators/update" else "sensor"
     json_activators = json.dumps(activators)
+    payload = json.dumps(payload)
     logger.info(f"Activators: {json_activators}")
     queue.put_nowait((payload, json_activators))
 
@@ -145,6 +179,14 @@ def light_level_analysis(client, value: float, room_id: int):
         room_lights[room_id] = 'HIGH'
 
 def movement_check(client, room_id: int):
+    room_light_activator = None
+    for act in activators:
+        if str(act['room_number']) == str(room_id) and act['type'] in ['light'] and act['auto']:
+            room_light_activator = act
+            break
+    if room_light_activator is None:
+        logger.info("No active activator found for movement check")
+        return
     if alarm_status[room_id] == 'ON':
         logger.info("Sending ALARM/ON command")
         client.publish(f'alarm/control-{room_id}', 'ON')
