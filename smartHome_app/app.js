@@ -30,6 +30,7 @@ function toggleLight(room) {
 
     // Prosta symulacja: przełączanie klas
     const isLightOn = lightElement.classList.contains('light-on');
+    const room_id = room === 'room1' ? 1 : 2;
 
     if (!isLightOn) {
         // Włącz światło
@@ -37,11 +38,13 @@ function toggleLight(room) {
         lightElement.classList.add('light-on');
         statusElement.textContent = 'Status: Światło WŁĄCZONE.';
         button.style.backgroundColor = '#f59e0b'; // Złoty kolor po włączeniu
-
+        
         ws.send(JSON.stringify({
+            id: "504895d3-4cf8-4516-ad7f-98daf340304c",
             type: "light",
-            room,
-            state: "on"
+            room_number: room_id,
+            status: "on",
+            auto: false
         }));
     } else {
         // Wyłącz światło
@@ -51,9 +54,11 @@ function toggleLight(room) {
         button.style.backgroundColor = '#9ca3af'; // Szary kolor po wyłączeniu
 
         ws.send(JSON.stringify({
+            id: "504895d3-4cf8-4516-ad7f-98daf340304c",
             type: "light",
-            room,
-            state: "off"
+            room_number: room_id,
+            status: "off",
+            auto: false
         }));
     }
 }
