@@ -130,10 +130,16 @@ def on_message(client, userdata, msg):
     # push do WebSocket
     payload = json.loads(msg.payload.decode())
     payload["device_type"] = "activator" if msg.topic == "activators/update" else "sensor"
-    json_activators = json.dumps(activators)
-    payload = json.dumps(payload)
-    logger.info(f"Activators: {json_activators}")
-    queue.put_nowait((payload, json_activators))
+    send_data = {
+        "sensor": payload,
+        "activators": activators
+    }
+    json_data = json.dumps(send_data)
+    
+    # json_activators = json.dumps(activators)
+    # payload = json.dumps(payload)
+    logger.info(f"Activators: {json_data}")
+    queue.put_nowait(json_data)
 
 def temperature_analysis(client, value: float, room_id: int, activator):
     room_thresholds = read_room_thresholds(room_id)

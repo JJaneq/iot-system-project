@@ -23,10 +23,9 @@ async def ws_handler(ws):
 
 async def broadcaster():
     while True:
-        message, activators = await queue.get()
+        data = await queue.get()
         for ws in connections:
-            await ws.send(message)
-            await ws.send(activators)
+            await ws.send(data)
 
 async def ws_main():
     async with websockets.serve(ws_handler, "0.0.0.0", 8765):
