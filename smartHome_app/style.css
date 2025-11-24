@@ -174,3 +174,24 @@ h1 {
     color: white;
     border-color: #3b82f6;
 }
+
+@keyframes svg-pulse-stroke {
+    0% {
+        stroke: red;
+        stroke-width: 3;
+    }
+    50% {
+        stroke: #ffcccc; /* Jaśniejszy kolor w środku pulsu */
+        stroke-width: 6; /* Ramka rozszerza się */
+    }
+    100% {
+        stroke: red;
+        stroke-width: 3;
+    }
+}
+
+/* Klasa, która uruchamia animację SVG */
+.motion-detected {
+    /* Uruchom animację 4 razy po 0.5s każda */
+    animation: svg-pulse-stroke 0.5s ease-in-out 4;
+}

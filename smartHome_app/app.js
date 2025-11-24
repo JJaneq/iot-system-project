@@ -5,13 +5,54 @@ const sensorsStore = new Map();
 // Funkcja do aktualizacji UI
 function updateUISocket(data) {
     console.log("OTRZYMAŁEM Z SOCKETA", data)
-    const sensor = sensorsStore.get(data.uuid);
-
-    if (!sensor) {
-        console.warn("Sensor ID not found in store", data.sensor_id);
-        return;
+    if (Array.isArray(data)) {
+        handleActivatorsUpdate(data);
+    }else{
+        const sensor = sensorsStore.get(data.uuid);
+        if (!sensor) {
+            console.warn("Sensor ID not found in store", data.sensor_id);
+            return;
+        }
+        updateUI(sensor.room, sensor.type, data.value);
     }
-    updateUI(sensor.room, sensor.type, data.value);
+}
+
+function handleActivatorsUpdate(activatorsArray) {
+    console.log(`Otrzymano ${activatorsArray.length} Aktywatorów. Rozpoczynanie aktualizacji.`); 
+    
+    activatorsArray.forEach(activator => {
+        const { type, room_number, status, auto, id } = activator;
+        const roomPrefix = `room${room_number}`;
+        
+        
+        // AKTUALIZACJA STATUSU TEKSTOWEGO W INTERFEJSIE
+        const statusElement = document.getElementById(`${roomPrefix}-${type}-status`);
+        //console.log(`Aktualizowanie statusu dla ${type} w pokoju ${room_number} trybu ${auto}`);
+        if (statusElement) {
+            let statusText = status==="ON" ? "WŁĄCZONE" : "WYŁĄCZONE";
+            let autoText = auto===true ? 'AUTO' : "MANUAL";
+            // Lepsze formatowanie tekstu statusu dla trybów
+            if (type === 'heater' || type === 'vent') {
+                
+                statusElement.textContent = `Status: ${autoText} ${type === 'heater' ? 'Ogrzewanie' : 'Wentylacja'} ${statusText}.`;
+            } else {
+                statusElement.textContent = `Status: ${autoText} ${type === 'light' ? 'Światło' : 'Alarm'} ${statusText}.`;
+                if (type === 'light' && status === 'ON' ){
+                    const lightElementId = `${roomPrefix}-light`;
+                    const lightElement = document.getElementById(lightElementId);
+                    lightElement.classList.add('light-on');
+                    lightElement.classList.remove('light-off');
+                }
+                else if (type === 'light' && status === 'OFF' ){
+                    const lightElementId = `${roomPrefix}-light`;
+                    const lightElement = document.getElementById(lightElementId);
+                    lightElement.classList.add('light-off');
+                    lightElement.classList.remove('light-on');
+                }
+            }
+        }
+
+    });
 }
 
 const ws = createWebSocket(updateUISocket);
@@ -22,72 +63,75 @@ const ws = createWebSocket(updateUISocket);
  */
 function toggleLight(room) {
     const lightElementId = `${room}-light`;
-    const statusElementId = `${room}-status`;
-
     const lightElement = document.getElementById(lightElementId);
-    const statusElement = document.getElementById(statusElementId);
     const button = document.getElementById(`light${room.slice(-1)}-btn`);
 
     // Prosta symulacja: przełączanie klas
     const isLightOn = lightElement.classList.contains('light-on');
     const room_id = room === 'room1' ? 1 : 2;
+    const id = room === 'room1' ? "504895d3-4cf8-4516-ad7f-98daf340304c" : "6966b068-cef5-4d30-b73d-9b9a057e4a64"
 
     if (!isLightOn) {
         // Włącz światło
-        lightElement.classList.remove('light-off');
         lightElement.classList.add('light-on');
-        statusElement.textContent = 'Status: Światło WŁĄCZONE.';
+        lightElement.classList.remove('light-off');
         button.style.backgroundColor = '#f59e0b';
-
+        console.log("ON światło w pokoju:", room);
+        
         ws.send(JSON.stringify({
-            id: "504895d3-4cf8-4516-ad7f-98daf340304c",
+            id: id,
             type: "light",
             room_number: room_id,
-            status: "on",
+            status: "ON",
             auto: false
         }));
     } else {
         // Wyłącz światło
         lightElement.classList.remove('light-on');
         lightElement.classList.add('light-off');
-        statusElement.textContent = 'Status: Światło WYŁĄCZONE.';
         button.style.backgroundColor = '#9ca3af'; // Szary kolor po wyłączeniu
-
+        console.log("OFF światło w pokoju:", room);
         ws.send(JSON.stringify({
-            id: "504895d3-4cf8-4516-ad7f-98daf340304c",
+            id: id,
             type: "light",
             room_number: room_id,
-            status: "off",
-            auto: false
+            status: "OFF",
+            auto: true
         }));
     }
 }
-
 
 function toggleAlarm(room) {
     const alarmElementId = `${room}-light`;
     const alarmElement = document.getElementById(alarmElementId);
     const button = document.getElementById(`alarm${room.slice(-1)}-btn`);
     const isAlarmOn = alarmElement.classList.contains('alarm-on');
+    const id = room === 'room1' ? "9e9da477-ac57-4d0b-a802-4d283de67005" : "d8e7200c-9f1c-4e66-a4fc-7b5c322e03ea"
+    const room_id = room === 'room1' ? 1 : 2;
     if (!isAlarmOn) {
         button.style.backgroundColor = '#e54712ff';
         alarmElement.classList.add('alarm-on');
         ws.send(JSON.stringify({
+            id: id,
             type: "alarm",
-            room,
-            state: "on"
+            room_number: room_id,
+            status: "ON",
+            auto: false
         }));
     } else {
-        button.style.backgroundColor = '#9ca3af';
         alarmElement.classList.remove('alarm-on');
+        button.style.backgroundColor = '#9ca3af';
         ws.send(JSON.stringify({
+            id: id,
             type: "alarm",
-            room,
-            state: "off"
+            room_number: room_id,
+            status: "OFF",
+            auto: true
         }));
     }
 }
 
+// Pobranie z bazy danych id sensorów
 function updateUIFromSensors(data) {
     data.forEach(item => {
 
@@ -95,7 +139,6 @@ function updateUIFromSensors(data) {
             room: item.room_number,
             type: item.sensor_type
         });
-        console.log(sensorsStore)
 
         updateUI(item.room_number, item.sensor_type, item.value);
     });
@@ -111,6 +154,21 @@ function updateUI(room, type, value) {
         document.getElementById(`humidity${room}-value`).textContent = value.toFixed(1);
         document.getElementById(`room${room}-humidity-display`).textContent = `W: ${value.toFixed(1)}%`;
     }
+
+    if (type === "movement") {
+        console.log("Ruch wykryty w pokoju", room, "Wartość:", value);
+        const alarmElementId = `room${room}-light`;
+        const alarmElement = document.getElementById(alarmElementId);
+        const isAlarmOn = alarmElement.classList.contains('alarm-on');
+        if (isAlarmOn && value == 1) {
+            console.log("ALARM! Ruch wykryty w pokoju", room);
+            alarmElement.classList.add('motion-detected');
+            setTimeout(() => {
+                alarmElement.classList.remove('motion-detected');
+            }, 2000);
+        }
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -118,8 +176,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lastData = await getLastRoomData();
     console.log("Dane z backendu na starcie:", lastData);
     updateUIFromSensors(lastData);
-    
-    // --- POKÓJ 1 ---
     
     // Oświetlenie
     document.getElementById('light1-btn').addEventListener('click', () => {
@@ -168,6 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const mode = btn.id.replace('mode-', '');
             console.log("Wybrany tryb:", mode);
+            sendSocketData('5435887c-d251-4007-9dcd-3618238edd17', 'heater', 1, mode)
         });
     });
     modeButtons1H.forEach(btn => {
@@ -177,6 +234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const mode = btn.id.replace('mode-', '');
             console.log("Wybrany tryb:", mode);
+            sendSocketData('3de9c84a-fbda-4e74-a898-7735321bece1', 'vent', 1, mode)
         });
     });
         modeButtons2T.forEach(btn => {
@@ -186,6 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const mode = btn.id.replace('mode-', '');
             console.log("Wybrany tryb:", mode);
+            sendSocketData('a21b600f-28b5-4c9a-b5cc-e554b2ec9f1f', 'heater', 2, mode)
         });
     });
     modeButtons2H.forEach(btn => {
@@ -195,7 +254,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const mode = btn.id.replace('mode-', '');
             console.log("Wybrany tryb:", mode);
+            sendSocketData('a3aeaee4-d84e-4ebe-b8c4-db0c6a66eee1', 'vent', 2, mode)
         });
     });
+
+    function sendSocketData (id, type, room_id, mode){
+        let status_val = "OFF"
+        let auto = false
+        if (mode === "auto"){
+            auto = true
+        }
+        if (mode === "on"){
+            status_val = "ON"
+        }
+        if (mode === "off"){
+            status_val = "OFF"
+        }
+        ws.send(JSON.stringify({
+            id: id,
+            type: type,
+            room_number: room_id,
+            status: status_val,
+            auto: auto
+        }));
+    }
+
      
 });

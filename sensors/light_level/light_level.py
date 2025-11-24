@@ -25,4 +25,4 @@ while True:
     message = json.dumps(message)
     print(f"Publishing message: {message}")
     client.publish("sensors/light_level", payload=message, qos=1)
-    time.sleep(60)
+    time.sleep(5)

@@ -95,8 +95,8 @@ def on_message(client, userdata, msg):
         logger.info(f"Activator update received: {activator_update}")
         for act in activators:
             if str(act['id']) == str(activator_update.get("id")):
-                if activator_update.get("auto") == True:
-                    break
+                # if activator_update.get("auto") == True:
+                #     break
                 act['status'] = activator_update.get("status").upper()
                 act['auto'] = activator_update.get("auto")
                 

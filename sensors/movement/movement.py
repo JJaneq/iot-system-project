@@ -16,7 +16,7 @@ def read_movement():
     return random.choice([0, 1])
 
 while True:
-    time.sleep(60)
+    time.sleep(5)
     message = {
         "uuid": uuid_str,
         "room_id": room_id,
